@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # 1. Web-Server (Имитация NGINX + Python)
+  web-server:
+        image: python:3.9-slim 
+        container_name: web-server
+        working_dir: /opt/app
+        ports:
+          - "8080:8080"
+        volumes:
+          - ./app:/opt/app
+        
+        command: sh -c "apt-get update && apt-get install -y default-libmysqlclient-dev pkg-config gcc && pip install mysqlclient && python /opt/app/app.py" 
+        
+        depends_on:
+          - db-server
+        environment:
+          DB_HOST: db-server
+          DB_NAME: devops_lab
+          DB_USER: devops
+          DB_PASS: secretpassword
+
+  # 2. DB-Server (MySQL)
+  db-server:
+    image: mysql:8.0
+    container_name: db-server
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: devops_lab
+      MYSQL_USER: devops
+      MYSQL_PASSWORD: secretpassword
